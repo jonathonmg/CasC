@@ -1,0 +1,328 @@
+removeStrategy:
+  rbac: SYNC
+  items: NONE
+items:
+- kind: pipeline
+  name: '229719'
+  concurrentBuild: true
+  definition:
+    cpsFlowDefinition:
+      sandbox: true
+      script: |-
+        pipeline {
+            agent any
+            stages {
+                stage('Hello') {
+                    steps {
+                        echo 'Dheeraj\'s Example:'
+                        script {
+                            emailNotify("testing emil from jenkins", "tesing emil from jenkins", 'jonathon.golden@gmail.com')
+                        }
+                     }
+                }
+            }
+        }
+
+        def emailNotify(String body, String subject, String notificationTo) {
+            emailext body: "${body}",
+            subject: "${subject}",
+            to: "${notificationTo}"
+            println("Email notification sent to ${notificationTo} with subject: ${subject}")
+        }
+  description: ''
+  disabled: false
+  displayName: '229719'
+  resumeBlocked: false
+- kind: pipeline
+  name: Fluckiger
+  concurrentBuild: true
+  definition:
+    cpsFlowDefinition:
+      sandbox: true
+      script: |-
+        pipeline {
+            agent {label "alpine"}
+
+            stages {
+                stage('Main') {
+                    steps {
+                        sh 'echo hello'
+                    }
+                }
+            }
+        }
+  description: ''
+  disabled: false
+  displayName: Fluckiger
+  resumeBlocked: false
+- kind: folder
+  name: Folder-A
+  description: ''
+  displayName: Folder-A
+  groups:
+  - members:
+      users:
+      - jblogs
+    roles:
+    - name: admin
+      grantedAt: current
+    name: admin
+  items:
+  - kind: pipeline
+    name: Test-Agent-Security
+    concurrentBuild: true
+    definition:
+      cpsFlowDefinition:
+        sandbox: true
+        script: |
+          pipeline {
+              agent any
+
+              stages {
+                  stage('PWD') {
+                      steps {
+                          sh 'pwd'
+                      }
+                  }
+              }
+          }
+    description: ''
+    disabled: false
+    displayName: Test-Agent-Security
+    resumeBlocked: false
+  properties:
+  - envVars: {}
+  - itemRestrictions:
+      filter: false
+- kind: folder
+  name: Folder-B
+  description: ''
+  displayName: Folder-B
+  items:
+  - kind: pipeline
+    name: Test-Agent-Security
+    concurrentBuild: true
+    definition:
+      cpsFlowDefinition:
+        sandbox: true
+        script: |
+          pipeline {
+              agent any
+
+              stages {
+                  stage('PWD') {
+                      steps {
+                          sh 'pwd'
+                          sh 'echo "NEFARIOUS STUFF" > /home/jenkins/workspace/Folder-A/nefarious.txt'
+                      }
+                  }
+              }
+          }
+    description: ''
+    disabled: false
+    displayName: Test-Agent-Security
+    resumeBlocked: false
+  properties:
+  - envVars: {}
+  - itemRestrictions:
+      filter: false
+- kind: folder
+  name: Folder-C
+  description: ''
+  displayName: Folder-C
+  items:
+  - kind: pipeline
+    name: Stub
+    concurrentBuild: true
+    definition:
+      cpsFlowDefinition:
+        sandbox: true
+        script: |
+          pipeline {
+              agent any
+
+              stages {
+                  stage('PWD') {
+                      steps {
+                          sh ''
+                      }
+                  }
+              }
+          }
+    description: ''
+    disabled: false
+    displayName: Stub
+    resumeBlocked: false
+  properties:
+  - envVars: {}
+  - itemRestrictions:
+      filter: false
+- kind: organizationFolder
+  name: jonathonmg
+  displayName: Jonathon Michael Golden
+  groups:
+  - members:
+      internal_groups:
+      - Rednecks
+    roles:
+    - name: mountainmen
+      grantedAt: current
+    name: REGULAR-USERS
+  - members:
+      internal_groups:
+      - admin
+    roles:
+    - name: admin
+      grantedAt: current
+    name: SUPER_USERS
+  navigators:
+  - github:
+      apiUri: https://api.github.com
+      traits:
+      - gitHubBranchDiscovery:
+          strategyId: 1
+      - gitHubPullRequestDiscovery:
+          strategyId: 1
+      - gitHubForkDiscovery:
+          trust:
+            gitHubTrustPermissions: {}
+          strategyId: 1
+      repoOwner: jonathonmg
+      credentialsId: cbci-github-jonathonmg
+  orphanedItemStrategy:
+    defaultOrphanedItemStrategy:
+      pruneDeadBranches: true
+      daysToKeep: -1
+      numToKeep: -1
+      abortBuilds: false
+  projectFactories:
+  - workflowMultiBranchProjectFactory:
+      scriptPath: Jenkinsfile
+  properties:
+  - organizationChildHealthMetricsProperty:
+      templates:
+      - worstChildHealthMetric:
+          recursive: true
+      - averageChildHealthMetric: {}
+      - jobStatusHealthMetric:
+          unstable: true
+          countVirginJobs: false
+          failure: true
+          success: true
+          unbuilt: true
+      - projectEnabledHealthMetric: {}
+  - organizationChildOrphanedItemsProperty:
+      strategy:
+        inherit: {}
+  - organizationChildTriggersProperty:
+      templates:
+      - periodicFolderTrigger:
+          interval: 1d
+  - envVars: {}
+  - suppressFolderAutomaticTriggering:
+      strategy: NONE
+      branches: .*
+  strategy:
+    allBranchesSame: {}
+  trigger:
+    periodicFolderTrigger:
+      interval: 1d
+- kind: freeStyle
+  name: JustToRecordBuiltOn
+  blockBuildWhenDownstreamBuilding: false
+  blockBuildWhenUpstreamBuilding: false
+  builders:
+  - shell:
+      command: ls -alh
+  concurrentBuild: false
+  description: ''
+  disabled: false
+  displayName: JustToRecordBuiltOn
+  label: alpine
+  scm:
+    none: {}
+  scmCheckoutStrategy:
+    standard: {}
+- kind: multibranch
+  name: sandbox
+  displayName: sandbox
+  groups:
+  - members:
+      users:
+      - jgolden
+    roles:
+    - name: mountainmen
+      grantedAt: current
+    name: SANDBOX-USERS
+  - members:
+      users:
+      - jgolden
+    roles:
+    - name: admin
+      grantedAt: current
+    name: SANDBOX-SUPER-USERS
+  orphanedItemStrategy:
+    defaultOrphanedItemStrategy:
+      pruneDeadBranches: true
+      daysToKeep: -1
+      numToKeep: -1
+      abortBuilds: false
+  projectFactory:
+    workflowBranchProjectFactory:
+      scriptPath: Jenkinsfile.traditional
+  properties:
+  - envVars: {}
+  sourcesList:
+  - branchSource:
+      source:
+        github:
+          apiUri: https://api.github.com
+          traits:
+          - gitHubBranchDiscovery:
+              strategyId: 1
+          - gitHubPullRequestDiscovery:
+              strategyId: 1
+          - gitHubForkDiscovery:
+              trust:
+                gitHubTrustPermissions: {}
+              strategyId: 1
+          repoOwner: jgoldenthunder
+          credentialsId: jgoldenthunder-private
+          id: f9e0c6ee-a2d6-4982-b0fa-4f759d49a16a
+          repository: sandbox
+          configuredByUrl: true
+          repositoryUrl: https://github.com/jgoldenthunder/sandbox
+      strategy:
+        allBranchesSame: {}
+- kind: pipeline
+  name: Simple
+  concurrentBuild: true
+  definition:
+    cpsFlowDefinition:
+      sandbox: true
+      script: |-
+        pipeline {
+            agent {
+               label "alpine"
+            }
+            stages {
+                stage('Hello') {
+                    environment {
+                        def MY_VAR = "ABCDEFG"
+                    }
+                    steps {
+                        echo "${MY_VAR}"
+                        sh 'git --version'
+                    }
+                }
+            }
+        }
+  description: ''
+  disabled: false
+  displayName: Simple
+  properties:
+  - pipelineTriggers:
+      triggers:
+      - cron:
+          spec: H 0 15 2 *
+  resumeBlocked: false
